@@ -74,3 +74,16 @@ def Vector.coord (i n : ℕ) : (i < n) →  ℝ ^ n :=
 /-- The coordinate functions -/
 def SmoothFunction.coord (i n : ℕ) (h : i < n) : SmoothFunction n := 
   ⟨fun v : Vector ℝ n => v.get ⟨i, h⟩, fun _ => 0⟩
+
+instance : Coe  ℝ  (ℝ ^ 1) := ⟨fun c => Vector.cons c Vector.nil⟩
+
+instance : Coe  (ℝ ^ 1) ℝ  := ⟨fun v => v.get ⟨0, Nat.zero_lt_succ 0⟩⟩
+
+/-- Composition with a smooth function `ℝ → ℝ` with chain rule for derivative -/
+def SmoothFunction.comp {n: ℕ} (g : SmoothFunction 1) (f : SmoothFunction n)  : SmoothFunction n := 
+  ⟨fun v => g.asFunc (f.asFunc v : ℝ ^ 1), fun v => 
+    let g' : ℝ  := g.grad (f.asFunc v)
+    let f' := f.grad v
+    g' •  f'⟩
+
+infix:65 " ∘ " => SmoothFunction.comp
