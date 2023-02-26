@@ -47,7 +47,7 @@ opaque hasGradAt {n: ℕ} (f : ℝ ^ n → ℝ)(x : ℝ ^n) : Prop
 structure SmoothFunction (n : ℕ) where
   asFunc : ℝ ^ n → ℝ 
   grad : ℝ ^ n  → ℝ ^ n
-  -- hasGradAt : ∀ x, hasGradAt jetMap x
+  --hasGradAt : ∀ x, hasGradAt jetMap x
 
 /-- Should be proved as a theorem -/
 axiom gradient_determined {n: ℕ} (f g : SmoothFunction n) : 
@@ -58,6 +58,13 @@ def zeroVector {n : ℕ} : ℝ ^ n := match n with
   | n + 1 => Vector.cons 0 (zeroVector : ℝ ^ n)
 
 instance {n: ℕ} : Zero (ℝ ^ n) := ⟨zeroVector⟩
+
+def consVector {n : ℕ} (c : ℝ) : ℝ ^ n := match n with 
+  | 0 => Vector.nil
+  | n + 1 => Vector.cons c (zeroVector : ℝ ^ n)
+
+def Jet.const (n : ℕ) (c : ℝ) : Jet n := 
+  ⟨c, zeroVector⟩
 
 def SmoothFunction.const (n : ℕ) (c : ℝ) : SmoothFunction n := 
   ⟨fun _ => c, fun _ => 0⟩
