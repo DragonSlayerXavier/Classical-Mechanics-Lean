@@ -6,22 +6,18 @@ namespace Newton1
 
 --Newton mechanics in ℝ 
 
-/-! Uniform accelarated motion : This can be extended to non-uniformly accelarated motion too. 
-   The only reason we have considered 
--/
-
 /-! Should include hypothesis in the definition of Particle without error.
 -/
 structure Particle where
   m : ℝ 
   x : Jet.SmoothFunction 1
   v : Jet.SmoothFunction 1
-  --{h : v.asFunc = x.grad}
+  --{h : Vector.cons (v.asFunc) Vector.nil = Vector.get x.grad ⟨0, Nat.zero_lt_succ 0⟩}
 
 /-! Unsure of how to define gradient of 'a' here
 -/
-def a (z : Particle) : (Jet.SmoothFunction 1) := 
-  ⟨fun (t : ℝ^1) => z.v.grad t, 0⟩  
+def a (z : Particle) : (ℝ → ℝ) := 
+  fun (t : ℝ) => z.v.grad t 
 
 /-! Coe ℝ (ℝ ^ 1) is not working below. 
 -/
@@ -36,46 +32,78 @@ structure System (n : ℕ) :=
 -/
 def mSys {n : ℕ} (S : System n) : ℝ := 
   let l := (S.VecPar).toList
-  match l with
-  | head :: tail => 
-    have h1 : S.VecPar.length = n := by
-      simp 
     have h2 : List.length l = n := by
       simp  
+  match l with
+  | head :: tail => 
     have h3 : List.length (head::tail) = n := by
-      sorry
-    have h : (List.length tail = n-1) := by
-      sorry
+      apply h2   
+    have h4 : List.length (head::tail) = Nat.succ (List.length tail) := by
+      apply List.length_cons 
+    have h5 : Nat.succ (List.length tail) = n := by
+      trans 
+      · apply h4
+      · apply h3
+    have h7 : n = Nat.succ (List.length tail) := by
+      apply h5.symm
+    have h8 : n-1 = List.length tail := by
+      apply Nat.pred_eq_of_eq_succ h7
+    have h : List.length tail = n-1 := by
+      apply h8.symm 
     head.m + (mSys ⟨⟨tail, h⟩, S.Fext⟩)
   | [] => 0
 
 def pSys {n : ℕ} (S : System n) : (Jet.SmoothFunction 1) := 
   let l := S.VecPar.toList 
+  have h2 : List.length l = n := by
+    simp  
   match l with 
   | head :: tail => 
-    have h1 : S.VecPar.length = n := by
-      simp 
-    have h2 : List.length l = n := by
-      simp  
     have h3 : List.length (head::tail) = n := by
-      sorry
-    have h : (List.length tail = n-1) := by
-      sorry
-    (p(head).asFunc)*(head.m) + pSys ⟨⟨tail, h⟩, S.Fext⟩
-  |[] => ⟨0, 0⟩ 
+      apply h2   
+    have h4 : List.length (head::tail) = Nat.succ (List.length tail) := by
+      apply List.length_cons 
+    have h5 : Nat.succ (List.length tail) = n := by
+      trans 
+      · apply h4
+      · apply h3
+    have h7 : n = Nat.succ (List.length tail) := by
+      apply h5.symm
+    have h8 : n-1 = List.length tail := by
+      apply Nat.pred_eq_of_eq_succ h7
+    have h : List.length tail = n-1 := by
+      apply h8.symm 
+    ⟨fun (t : ℝ^1) => (p head).asFunc t + (pSys ⟨⟨tail, h⟩, S.Fext⟩).asFunc t, (p head).grad + (pSys ⟨⟨tail, h⟩, S.Fext⟩).grad⟩
+  | [] => ⟨0, 0⟩ 
+
+def vcom {n : ℕ} (S : System n) : (Jet.SmoothFunction 1) := 
+  let l := S.VecPar.toList
+  have h2 : List.length l = n := by
+    simp  
+  match l with 
+  | head :: tail => 
+    have h3 : List.length (head::tail) = n := by
+      apply h2   
+    have h4 : List.length (head::tail) = Nat.succ (List.length tail) := by
+      apply List.length_cons 
+    have h5 : Nat.succ (List.length tail) = n := by
+      trans 
+      · apply h4
+      · apply h3
+    have h7 : n = Nat.succ (List.length tail) := by
+      apply h5.symm
+    have h8 : n-1 = List.length tail := by
+      apply Nat.pred_eq_of_eq_succ h7
+    have h : List.length tail = n-1 := by
+      apply h8.symm 
+    ⟨fun (t : ℝ^1) => (((head.m)*(head.v.asFunc t) + (vcom ⟨⟨tail, h⟩, S.Fext⟩).asFunc t)/mSys S), fun (t : ℝ^1) => (head.m)*(head.v.grad t)/--! .get ⟨0, Nat.zero_lt_succ 0⟩-/ + (vcom ⟨⟨tail, h⟩, S.Fext⟩).grad t⟩
+  | [] => ⟨0, 0⟩
 
 def acom {n : ℕ} (S : System n) : (Jet.SmoothFunction 1) := 
-  let l := (S.VecPar).toList 
-  match l with 
-  | head :: tail 
-    => ⟨fun (t : ℝ^1) => (((head.m)*(a(head).asFunc t)) + (mSys )*(acom(tail).asFunc t))/n, a(head).grad + acom(tail).grad⟩ 
-
-def F (z : Particle) : (Jet.SmoothFunction 1) := 
-  ⟨fun (t : ℝ^1) => (z.m)*((a z).asFunc t), fun (t : ℝ^1) => (Jet.Vector.dot (Vector.cons (z.m) Vector.nil) ((a z).grad t))⟩
-
+  
 axiom SecondLaw {n : ℕ} (S : System n) : S.Fext = ⟨fun (t : ℝ^1) => (mSys S)*((acom S).asFunc t), fun (t : ℝ^1) => (mSys S)*(((acom S).grad t).get ⟨0, Nat.zero_lt_succ 0⟩)⟩ 
 
-axiom ConsMom {n : ℕ} (S : System n) : (S.Fext.asFunc = 0) → ((pSys S).grad = 0)
+axiom Conservation_of_Momentum {n : ℕ} (S : System n) : (S.Fext.asFunc = 0) → ((pSys S).grad = 0)
 
 
 

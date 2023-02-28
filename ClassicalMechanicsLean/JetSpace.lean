@@ -45,7 +45,7 @@ opaque hasGradAt {n: ℕ} (f : ℝ ^ n → ℝ)(x : ℝ ^n) : Prop
 
 /-- A function `ℝ^n → ℝ` with its gradient, the commented out condition should be added-/
 structure SmoothFunction (n : ℕ) where
-  asFunc : ℝ ^ n → ℝ 
+  asFunc : ℝ ^ n → ℝ
   grad : ℝ ^ n  → ℝ ^ n
   --hasGradAt : ∀ x, hasGradAt jetMap x
 
@@ -94,3 +94,6 @@ def SmoothFunction.comp {n: ℕ} (g : SmoothFunction 1) (f : SmoothFunction n)  
     g' •  f'⟩
 
 infix:65 " ∘ " => SmoothFunction.comp
+
+def addVec {n : ℕ} (v1 : ℝ^n) : ℝ := 
+  v1.toList.sum
