@@ -107,33 +107,4 @@ axiom Conservation_of_Momentum {n : ℕ} (S : System n) : (S.Fext.asFunc = 0) �
 
 
 
-
-/-!
-
-def m : ℝ := sorry
-
-def x : SmoothFunction := sorry
-
-def v : Jet.Jet 1 := sorry
-
-def a : Jet.Jet 1 := sorry
-
-theorem v_def : v.value = x.grad := sorry
-
---def v : Jet 1 := sorry
-
-def p : Jet  := ⟨m*v.value, Vector.dot v.gradient (consVector m)⟩ 
-
-def F : ℝ := m * a
-
-axiom m_pos : 0 < m
-
-axiom conservation_of_momentum : F = 0 → p = p
-
-axiom second_law : F = m * a
-
-theorem first_law : F = 0 → v = v := by simp [F, v, a, p, conservation_of_momentum, second_law]
-
--/
-
 end Newton1
