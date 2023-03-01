@@ -49,6 +49,9 @@ structure SmoothFunction (n : ℕ) where
   grad : ℝ ^ n  → ℝ ^ n
   --hasGradAt : ∀ x, hasGradAt jetMap x
 
+instance : CoeFun (SmoothFunction n) (fun _ => ℝ^n → ℝ) where
+  coe := SmoothFunction.asFunc
+
 /-- Should be proved as a theorem -/
 axiom gradient_determined {n: ℕ} (f g : SmoothFunction n) : 
     f.asFunc = g.asFunc → f = g
@@ -82,14 +85,18 @@ def Vector.coord (i n : ℕ) : (i < n) →  ℝ ^ n :=
 def SmoothFunction.coord (i n : ℕ) (h : i < n) : SmoothFunction n := 
   ⟨fun v : Vector ℝ n => v.get ⟨i, h⟩, fun _ => 0⟩
 
-instance : Coe  ℝ  (ℝ ^ 1) := ⟨fun c => Vector.cons c Vector.nil⟩
+-- instance : Coe  ℝ  (ℝ ^ 1) := ⟨fun c => Vector.cons c Vector.nil⟩
+/- instance (l : List ℝ) (n : outParam ℕ)
+         (h : outParam (l.length = n) := by rfl)
+    : CoeDep (List ℝ) l (ℝ^n) where
+  coe := ⟨l, h⟩ -/
 
 instance : Coe  (ℝ ^ 1) ℝ  := ⟨fun v => v.get ⟨0, Nat.zero_lt_succ 0⟩⟩
 
 /-- Composition with a smooth function `ℝ → ℝ` with chain rule for derivative -/
 def SmoothFunction.comp {n: ℕ} (g : SmoothFunction 1) (f : SmoothFunction n)  : SmoothFunction n := 
-  ⟨fun v => g.asFunc (f.asFunc v : ℝ ^ 1), fun v => 
-    let g' : ℝ  := g.grad (f.asFunc v)
+  ⟨fun v => g.asFunc ⟨[f.asFunc v], rfl⟩, fun v => 
+    let g' : ℝ  := g.grad ⟨[f.asFunc v], rfl⟩
     let f' := f.grad v
     g' •  f'⟩
 
