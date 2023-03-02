@@ -97,4 +97,15 @@ axiom Second_Law {n : ℕ} (S : System n) :
 axiom Conservation_of_Momentum {n : ℕ} (S : System n) :
   (S.Fext = 0) → (S.p.asFunc = 0)
 
+/-! We define the kinetic energy of a particle
+-/
+
+def half : ℚ := 1/2
+def Particle.Ek (z : Particle) : (ℝ → ℝ) :=
+  fun (t : ℝ) => (z.m)*(((z.v.asFunc ⟨[t], rfl⟩) : ℝ)^2)*(half)
+
+/-! We define the potential energy of a particle
+-/
+
+
 end Newton1
