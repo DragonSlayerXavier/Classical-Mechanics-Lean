@@ -44,16 +44,16 @@ instance liebnitz {n: ℕ} : Mul (Jet n) :=
 opaque hasGradAt {n: ℕ} (f : ℝ ^ n → ℝ)(x : ℝ ^n) : Prop 
 
 /-- A function `ℝ^n → ℝ` with its gradient, the commented out condition should be added-/
-structure SmoothFunction (n : ℕ) where
-  asFunc : ℝ ^ n → ℝ
-  grad : ℝ ^ n  → ℝ ^ n
+structure SmoothFunction (n : ℕ)(m : ℕ) where
+  asFunc : ℝ ^ n → ℝ ^ m
+  grad : ℝ ^ n  → ℝ ^ n → ℝ ^ m
   --hasGradAt : ∀ x, hasGradAt jetMap x
 
-instance : CoeFun (SmoothFunction n) (fun _ => ℝ^n → ℝ) where
+instance : CoeFun (SmoothFunction n m) (fun _ => ℝ^n → ℝ^m) where
   coe := SmoothFunction.asFunc
 
 /-- Should be proved as a theorem -/
-axiom gradient_determined {n: ℕ} (f g : SmoothFunction n) : 
+axiom gradient_determined {n: ℕ} {m : ℕ} (f g : SmoothFunction n m) : 
     f.asFunc = g.asFunc → f = g
 
 def zeroVector {n : ℕ} : ℝ ^ n := match n with 
@@ -69,7 +69,7 @@ def consVector {n : ℕ} (c : ℝ) : ℝ ^ n := match n with
 def Jet.const (n : ℕ) (c : ℝ) : Jet n := 
   ⟨c, zeroVector⟩
 
-def SmoothFunction.const (n : ℕ) (c : ℝ) : SmoothFunction n := 
+def SmoothFunction.const (n : ℕ) (m : ℕ) (c : ℝ^m) : SmoothFunction n m := 
   ⟨fun _ => c, fun _ => 0⟩
 
 def Vector.coord (i n : ℕ) : (i < n) →  ℝ ^ n :=
@@ -81,9 +81,12 @@ def Vector.coord (i n : ℕ) : (i < n) →  ℝ ^ n :=
      let tail : ℝ ^ k := Vector.coord i k (Nat.le_of_succ_le_succ pf) 
      Vector.cons 0 tail
 
-/-- The coordinate functions -/
-def SmoothFunction.coord (i n : ℕ) (h : i < n) : SmoothFunction n := 
-  ⟨fun v : Vector ℝ n => v.get ⟨i, h⟩, fun _ => 0⟩
+/-- The coordinate functions
+-- Fix later
+
+def SmoothFunction.coord (i n m : ℕ) (h : i < n) : SmoothFunction n m := 
+  ⟨fun v : Vector (Vector ℝ m) n => v.get ⟨i, h⟩, fun _ => 0⟩
+-/
 
 -- instance : Coe  ℝ  (ℝ ^ 1) := ⟨fun c => Vector.cons c Vector.nil⟩
 /- instance (l : List ℝ) (n : outParam ℕ)
@@ -93,12 +96,14 @@ def SmoothFunction.coord (i n : ℕ) (h : i < n) : SmoothFunction n :=
 
 instance : Coe  (ℝ ^ 1) ℝ  := ⟨fun v => v.get ⟨0, Nat.zero_lt_succ 0⟩⟩
 
-/-- Composition with a smooth function `ℝ → ℝ` with chain rule for derivative -/
-def SmoothFunction.comp {n: ℕ} (g : SmoothFunction 1) (f : SmoothFunction n)  : SmoothFunction n := 
-  ⟨fun v => g.asFunc ⟨[f.asFunc v], rfl⟩, fun v => 
-    let g' : ℝ  := g.grad ⟨[f.asFunc v], rfl⟩
+/-- Composition with a smooth function `ℝ → ℝ` with chain rule for derivative 
+
+def SmoothFunction.comp {n: ℕ} {l : ℕ} {m : ℕ} (g : SmoothFunction m l) (f : SmoothFunction n m)  : SmoothFunction n l := 
+  ⟨fun v => g.asFunc (f.asFunc v), fun v => 
+    let g' : ℝ^m → ℝ^l := g.grad (f.asFunc v )
     let f' := f.grad v
     g' •  f'⟩
+-/
 
 infix:65 " ∘ " => SmoothFunction.comp
 
