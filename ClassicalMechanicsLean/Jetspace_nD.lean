@@ -96,14 +96,14 @@ def SmoothFunction.coord (i n m : ℕ) (h : i < n) : SmoothFunction n m :=
 
 instance : Coe  (ℝ ^ 1) ℝ  := ⟨fun v => v.get ⟨0, Nat.zero_lt_succ 0⟩⟩
 
-/-- Composition with a smooth function `ℝ → ℝ` with chain rule for derivative 
+/-- Composition with a smooth function `ℝ → ℝ` with chain rule for derivative-/
 
 def SmoothFunction.comp {n: ℕ} {l : ℕ} {m : ℕ} (g : SmoothFunction m l) (f : SmoothFunction n m)  : SmoothFunction n l := 
   ⟨fun v => g.asFunc (f.asFunc v), fun v => 
     let g' : ℝ^m → ℝ^l := g.grad (f.asFunc v )
-    let f' := f.grad v
+    let f' : ℝ^n → ℝ^m := f.grad v
     g' •  f'⟩
--/
+
 
 infix:65 " ∘ " => SmoothFunction.comp
 
