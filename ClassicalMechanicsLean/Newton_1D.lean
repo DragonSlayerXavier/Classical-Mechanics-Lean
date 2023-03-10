@@ -29,7 +29,7 @@ def Particle.p (z : Particle) : (Jet.SmoothFunction 1) :=
 
 structure System (n : ℕ) := 
   particles : Vector Particle n
-  Fext : ℝ → ℝ 
+  Fext : Vector (ℝ → ℝ) n 
 
 /-! Sum of mass of particles in a system
 -/
@@ -91,11 +91,10 @@ def System.acom {n : ℕ} (S : System n) : (ℝ → ℝ) :=
 
 /-! We give two of the most fundmental laws of Newton mechanics
 -/  
-axiom Second_Law {n : ℕ} (S : System n) : 
-  S.Fext = fun (t) => S.m * S.acom t
 
-axiom Conservation_of_Momentum {n : ℕ} (S : System n) :
-  (S.Fext = 0) → (S.p.asFunc = 0)
+structure NewtonianSystem  (n : ℕ) extends System n where
+  Second_Law : (Fext.toList.sum = fun (t) => m * toSystem.acom t)
+  Conservation_of_Momentum : (Fext.toList.sum = ZeroVector) → (toSystem.p.asFunc = 0)
 
 /-! We define the kinetic energy of a particle
 -/
