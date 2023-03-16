@@ -4,7 +4,8 @@ import ClassicalMechanicsLean.JetSpace_1D
 
 namespace Newton1
 
---Newton mechanics in ℝ 
+/-# Newton mechanics in ℝ 
+-/
 
 /-! Should include hypothesis in the definition of Particle without error.
 -/
