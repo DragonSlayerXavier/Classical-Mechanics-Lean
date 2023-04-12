@@ -1,5 +1,6 @@
 import Mathlib
 
+
 /-!
 # Jet Spaces
 
@@ -80,13 +81,14 @@ def Vector.coord (i n : ℕ) : (i < n) →  ℝ ^ n :=
   | i + 1, k + 1, pf => 
      let tail : ℝ ^ k := Vector.coord i k (Nat.le_of_succ_le_succ pf) 
      Vector.cons 0 tail
-
+ 
 /-- The coordinate functions
--- Fix later
-
-def SmoothFunction.coord (i n m : ℕ) (h : i < n) : SmoothFunction n m := 
-  ⟨fun v : Vector (Vector ℝ m) n => v.get ⟨i, h⟩, fun _ => 0⟩
+-- Fix later-/
+/-
+def SmoothFunction.coord (i n m : ℕ) (h : i < n) : Smoothfunction n m := 
+  ⟨fun v : Vector ℝ n => Vector.cons (v.get ⟨i, h⟩) Vector.nil, fun _ => 0⟩
 -/
+
 
 -- instance : Coe  ℝ  (ℝ ^ 1) := ⟨fun c => Vector.cons c Vector.nil⟩
 /- instance (l : List ℝ) (n : outParam ℕ)
@@ -96,13 +98,31 @@ def SmoothFunction.coord (i n m : ℕ) (h : i < n) : SmoothFunction n m :=
 
 instance : Coe  (ℝ ^ 1) ℝ  := ⟨fun v => v.get ⟨0, Nat.zero_lt_succ 0⟩⟩
 
-/-- Composition with a smooth function `ℝ → ℝ` with chain rule for derivative-/
+/-! Composition with a smooth function `ℝ → ℝ` with chain rule for derivative
+-/
+
+/-! Matrix muliplication has been ported to mathlib4 and can be used here
+-/
+namespace Matrix
+
+def array.coord {n m i j: ℕ} (h1 : i < n) (h2 : j < m) (f : ℝ^n → ℝ^m) : ℝ := 
+  (f (Vector.coord i n h1)).get ⟨j, h2⟩
+
+def array (n m : ℕ) (f : ℝ^n → ℝ^m) : List ℝ := 
+  match m, n with 
+  | _, _ => sorry
+
+end Matrix
+
+def matrix_mul {l m n : ℕ} (f : ℝ^n → ℝ^m) (g : ℝ^m → ℝ^l) : ℝ^n → ℝ^l := 
+  
+  sorry
 
 def SmoothFunction.comp {n: ℕ} {l : ℕ} {m : ℕ} (g : SmoothFunction m l) (f : SmoothFunction n m)  : SmoothFunction n l := 
-  ⟨fun v => g.asFunc (f.asFunc v), fun v => 
+  ⟨fun v => g.asFunc (f.asFunc v), fun v =>
     let g' : ℝ^m → ℝ^l := g.grad (f.asFunc v )
     let f' : ℝ^n → ℝ^m := f.grad v
-    g' •  f'⟩
+    fun v => g' (f' v)⟩
 
 
 infix:65 " ∘ " => SmoothFunction.comp

@@ -34,7 +34,6 @@ As an exercise, prove that flip ends of an interval gives the negative of the in
 theorem integral_flip (f : ℝ → ℝ) [int : Integrable f]
   (a b : ℝ ) : integral f a b = - integral f b a := by
     unfold integral
-    have l := int.interval_union a b b
     have lem1 : int.integral a b + int.integral b a = 0 := by
       trans
       · rw [<- int.interval_union a b a]
@@ -100,14 +99,14 @@ def constant (c : ℝ) : SmoothFunction :=
 /--
 Sum of smooth functions.
 -/
-def sum (f g : Jet.SmoothFunction 1) : Jet.SmoothFunction 1 := 
-  ⟨fun x => f.value x + g.value x, fun x => Vector.cons (f.derivative x + g.derivative x) Vector.nil⟩
+@[simp] def sum (f g : Jet.SmoothFunction 1) : Jet.SmoothFunction 1 := 
+  ⟨fun x => f.asFunc x + g.asFunc x, fun x => Vector.cons (f.grad x + g.grad x) Vector.nil⟩
 
 /--
 Product of smooth functions using Liebnitz rule.
 -/
 def prod (f g : Jet.SmoothFunction 1) : Jet.SmoothFunction 1 :=
-  ⟨fun x => f.value x * g.value x, fun x => Vector.cons (f.derivative x * g.value x + f.value x * g.derivative x) Vector.nil⟩
+  ⟨fun x => f.asFunc x * g.asFunc x, fun x => Vector.cons (f.grad x * g.asFunc x + f.asFunc x * g.grad x) Vector.nil⟩
 
 /--
 Product of a scalar and a smooth function.
@@ -129,28 +128,67 @@ We will define some polynomials as smooth functions as an example.
 
 /- Can we use extends here -/
 
-theorem Jet.SmoothFunction.add.comm (f g : Jet.SmoothFunction 1) : f + g = g + f := by
-  have lem1 : (fun x => f.asFunc x + g.asFunc x) = (fun x => g.asFunc x + f.asFunc x) := by
-    apply add_comm
-  have lem2 : (fun x => f.grad x + g.grad x) = (fun x => g.grad x + f.grad x) := by
-    sorry
-    --apply add_comm
-  sorry 
+axiom UniqDeriv {n : ℕ} (f g : Jet.SmoothFunction n) : f.asFunc = g.asFunc → f = g
 
-theorem Jet.smoothfunction.add.assoc (f g h : Jet.SmoothFunction 1) : (f + g) + h = f + (g + h) := by
-  have lem1 : (fun x => (f.asFunc x + g.asFunc x) + h.asFunc x) = (fun x => f.asFunc x + (g.asFunc x + h.asFunc x)) := by
-    apply add_assoc
-  have lem2 : (fun x => (f.grad x + g.grad x) + h.grad x) = (fun x => f.grad x + (g.grad x + h.grad x)) := by
-    sorry
-  sorry
+@[ext] theorem Jet.SmoothFunction.ext: ∀ {n : ℕ}{f g : Jet.SmoothFunction n}, f.asFunc = g.asFunc  → f = g := by
+  apply UniqDeriv
 
-theorem Jet.smoothfunction.add.zero (f : Jet.SmoothFunction 1) : f + 0 = f := by
-  have lem1 : (fun x => f.asFunc x + 0) = (fun x => f.asFunc x) := by
+instance : CommRing (Jet.SmoothFunction 1) where 
+  zero := ⟨fun x => 0, fun x => Vector.cons 0 Vector.nil⟩
+  one := ⟨fun x => 1, fun x => Vector.cons 0 Vector.nil⟩
+  add_zero := by
+    intro f 
+    ext x
     apply add_zero
-  have lem2 : (fun x => f.grad x + 0) = (fun x => f.grad x) := by
-    sorry
-    --simp[Jet.SmoothFunction.add]
-  sorry
+  add_assoc := by 
+    intro a b c
+    ext x
+    apply add_assoc
+  zero_add := by
+    intro f
+    ext x
+    apply zero_add 
+  add_comm := by
+    intro a b
+    ext x
+    apply add_comm
+  left_distrib:= by
+    intro a b c
+    ext x
+    apply left_distrib
+  right_distrib := by
+    intro a b c
+    ext x
+    apply right_distrib
+  mul_zero:= by
+    intro f
+    ext x
+    apply mul_zero
+  zero_mul := by
+    intro f
+    ext x
+    apply zero_mul 
+  mul_assoc := by
+    intro a b c
+    ext x
+    apply mul_assoc
+  mul_comm := by
+    intro a b
+    ext x
+    apply mul_comm
+  one_mul := by
+    intro f
+    ext x
+    apply one_mul
+  mul_one := by 
+    intro f
+    ext x
+    apply mul_one
+  neg := (fun f => ⟨fun x => - f.asFunc x, fun x => Vector.cons (- f.grad x) Vector.nil⟩)
+  add_left_neg := by
+    intro f
+    ext x
+    apply add_left_neg
 
 /-- The coordinate function -/
 def x : Jet.SmoothFunction 1 := ⟨fun x => x, fun x => ⟨[1], rfl⟩⟩
@@ -166,6 +204,7 @@ instance : Coe ℝ SmoothFunction := ⟨constant⟩
 
 /-- A polynomial. We can have cleaner notation but the goal is to illustrate the construction -/
 def poly_example := (Jet.SmoothFunction.const 1 2) * x+ (Jet.SmoothFunction.const 1 3) * x^3 + (Jet.SmoothFunction.const 1 7)
+
 
 
 end SmoothFunction

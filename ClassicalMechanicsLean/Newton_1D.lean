@@ -110,4 +110,5 @@ def Particle.Ek (z : Particle) : (ℝ → ℝ) :=
 
 
 
+
 end Newton1
