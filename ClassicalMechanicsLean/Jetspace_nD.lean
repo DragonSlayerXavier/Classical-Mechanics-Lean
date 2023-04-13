@@ -14,7 +14,9 @@ namespace Jet
 universe u
 
 /-- Notation ℝ^n etc -/
-instance : HPow (Type u) ℕ (Type u) := ⟨fun k n ↦ Vector k n⟩ 
+-- instance : HPow (Type u) ℕ (Type u) := ⟨fun k n ↦ Vector k n⟩ 
+
+notation x:85 "^" y:85 => Vector x y
 
 structure Jet (n : ℕ) where 
   value : ℝ 
@@ -42,15 +44,15 @@ instance liebnitz {n: ℕ} : Mul (Jet n) :=
   ⟨fun j₁ j₂ => ⟨j₁.value * j₂.value, j₁.value • j₂.gradient + j₂.value • j₁.gradient⟩⟩
 
 /-- Should be replaced by an actual definition eventually -/
-opaque hasGradAt {n: ℕ} (f : ℝ ^ n → ℝ)(x : ℝ ^n) : Prop 
+opaque hasGradAt {n: ℕ} (f : (ℝ ^ n) → ℝ)(x : ℝ ^n) : Prop 
 
 /-- A function `ℝ^n → ℝ` with its gradient, the commented out condition should be added-/
 structure SmoothFunction (n : ℕ)(m : ℕ) where
-  asFunc : ℝ ^ n → ℝ ^ m
-  grad : ℝ ^ n  → ℝ ^ n → ℝ ^ m
+  asFunc : (ℝ ^ n) → ℝ ^ m
+  grad : (ℝ ^ n)  → (ℝ ^ n) → ℝ ^ m
   --hasGradAt : ∀ x, hasGradAt jetMap x
 
-instance : CoeFun (SmoothFunction n m) (fun _ => ℝ^n → ℝ^m) where
+instance : CoeFun (SmoothFunction n m) (fun _ => (ℝ^n) → ℝ^m) where
   coe := SmoothFunction.asFunc
 
 /-- Should be proved as a theorem -/
@@ -96,7 +98,7 @@ def SmoothFunction.coord (i n m : ℕ) (h : i < n) : Smoothfunction n m :=
     : CoeDep (List ℝ) l (ℝ^n) where
   coe := ⟨l, h⟩ -/
 
-instance : Coe  (ℝ ^ 1) ℝ  := ⟨fun v => v.get ⟨0, Nat.zero_lt_succ 0⟩⟩
+instance : Coe  (Vector ℝ 1) ℝ  := ⟨fun v => v.get ⟨0, Nat.zero_lt_succ 0⟩⟩
 
 /-! Composition with a smooth function `ℝ → ℝ` with chain rule for derivative
 -/
@@ -108,14 +110,17 @@ namespace Matrix
 def array.coord {n m i j: ℕ} (h1 : i < n) (h2 : j < m) (f : ℝ^n → ℝ^m) : ℝ := 
   (f (Vector.coord i n h1)).get ⟨j, h2⟩
 
-def array (n m : ℕ) (f : ℝ^n → ℝ^m) : List ℝ := 
+def array (n m : ℕ) (f : ℝ^n → ℝ^m) : Vector ℝ (m*n):= 
   match m, n with 
-  | _, _ => sorry
+  | 0, n => sorry
+  | m+1, n => sorry
+    --let tail : Vector ℝ (m*n) := array n m f
+    --sorry
+    
 
 end Matrix
 
 def matrix_mul {l m n : ℕ} (f : ℝ^n → ℝ^m) (g : ℝ^m → ℝ^l) : ℝ^n → ℝ^l := 
-  
   sorry
 
 def SmoothFunction.comp {n: ℕ} {l : ℕ} {m : ℕ} (g : SmoothFunction m l) (f : SmoothFunction n m)  : SmoothFunction n l := 

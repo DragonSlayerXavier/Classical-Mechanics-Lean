@@ -42,7 +42,7 @@ theorem integral_flip (f : ℝ → ℝ) [int : Integrable f]
       apply eq_zero_sub_of_add_eq_zero_left lem1 
     simp at lem2
     apply lem2
-    
+
 
 /-!
 ## Formal Derivatives
@@ -204,7 +204,5 @@ instance : Coe ℝ SmoothFunction := ⟨constant⟩
 
 /-- A polynomial. We can have cleaner notation but the goal is to illustrate the construction -/
 def poly_example := (Jet.SmoothFunction.const 1 2) * x+ (Jet.SmoothFunction.const 1 3) * x^3 + (Jet.SmoothFunction.const 1 7)
-
-
 
 end SmoothFunction
