@@ -16,7 +16,7 @@ universe u
 /-- Notation ℝ^n etc -/
 -- instance : HPow (Type u) ℕ (Type u) := ⟨fun k n ↦ Vector k n⟩ 
 
-notation x:85 "^" y:85 => Vector x y
+notation (priority := high) x:85 "^" y:85 => Vector x y
 
 structure Jet (n : ℕ) where 
   value : ℝ 

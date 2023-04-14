@@ -13,6 +13,7 @@ structure Particle (n : ℕ) where
   m : ℝ 
   x : Jet.SmoothFunction 1 n 
   v : Jet.SmoothFunction 1 n
+  F : ℝ^n → ℝ^n 
   --{h : Vector.cons (v.asFunc) Vector.nil = Vector.get x.grad ⟨0, Nat.zero_lt_succ 0⟩}
 
 /-! We then define particle's velocity and acccelaration as given below
@@ -30,13 +31,18 @@ def Particle.p {n : ℕ} (z : Particle n) : (Jet.SmoothFunction 1 n) :=
 
 structure System (n : ℕ) (m : ℕ) := 
   particles : Vector (Particle n) m
-  Fext : ℝ → ℝ^n 
 
 /-! Sum of mass of particles in a system
 -/
 
 def System.m {n : ℕ} {m : ℕ} (S : System n m) : ℝ :=
   S.particles.map Particle.m |>.toList.sum
+
+/--Fext of a system
+-/
+
+def System.F {n : ℕ} {m : ℕ} (S : System n m) : (ℝ^n → ℝ^n) :=
+  fun (x : ℝ^n) => S.particles.map (fun  z => z.F x) |>.toList.sum
 
 /- Initial attempt to define System.m
 
@@ -66,9 +72,9 @@ def System.p {n : ℕ} {m : ℕ} (S : System n m) : (Jet.SmoothFunction 1 n) :=
 /-! Velocity and accelaration of centre of mass of a system is defined below
 -/
 
-def System.vcom {n : ℕ} {m : ℕ} (S : System n m) : (Jet.SmoothFunction 1 n) := 
-  ⟨fun t => S.particles.map (fun p => p.v.asFunc t) |>.toList.sum, 
-   fun t => S.particles.map (fun p => p.v.grad t) |>.toList.sum⟩ 
+noncomputable def System.vcom {n : ℕ} {m : ℕ} (S : System n m) : (Jet.SmoothFunction 1 n) := 
+  ⟨fun t => S.particles.map (fun z => (1/S.m)•(z.v.asFunc t)) |>.toList.sum, 
+   fun t => S.particles.map (fun z => (1/S.m)•(z.v.grad t)) |>.toList.sum⟩ 
 
 /-! Initial attempt at defining velocity of centre of mass
 
@@ -90,16 +96,16 @@ def System.vcom {n : ℕ} {m : ℕ} (S : System n m) : (Jet.SmoothFunction 1 n) 
   | [] => ⟨0, 0⟩
 -/
 
-def System.acom {n : ℕ} {m : ℕ} (S : System n m) : (ℝ → ℝ^n) :=
+noncomputable def System.acom {n : ℕ} {m : ℕ} (S : System n m) : (ℝ → ℝ^n) :=
   fun (t : ℝ) => (S.vcom.grad ⟨[t], rfl⟩ ⟨[t], rfl⟩) 
 
 /-! We give two of the most fundmental laws of Newton mechanics
 -/  
-axiom Second_Law {n : ℕ} {m : ℕ} (S : System n m) : 
-  S.Fext = fun (t) => (S.acom t).map (S.m*·)
 
-axiom Conservation_of_Momentum {n : ℕ} {m : ℕ} (S : System n m) :
-  (S.Fext = 0) → (S.p.asFunc = 0)
+structure NewtonianSystem (n : ℕ) (m : ℕ) extends System n m where 
+  Second_Law : fun (x : ℝ^n) => fun (t : ℝ) => ((toSystem.F x) = (toSystem.m)•(toSystem.acom t))
+  Conservation_of_Momentum :=  (toSystem.F = 0) → (toSystem.p.grad = 0)
+
 
 /-! We define the kinetic energy of a particle
 -/

@@ -98,7 +98,7 @@ noncomputable def System.acom {n : ℕ} (S : System n) : (ℝ → ℝ) :=
 
 structure NewtonianSystem  (n : ℕ) extends System n where
   Second_Law : fun (x : ℝ^1) => toSystem.particles.map (fun p => p.F x) |>.toList.sum = fun (x : ℝ^1) => m * toSystem.acom x
-  Conservation_of_Momentum : (toSystem.Fext = ZeroVector) → (toSystem.p.asFunc = 0)
+  Conservation_of_Momentum : (toSystem.Fext = 0) → (toSystem.p.grad = 0)
 
 
 /-- Third Law of Newton mechanics
