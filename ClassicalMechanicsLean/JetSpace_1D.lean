@@ -108,3 +108,5 @@ infix:65 " ∘ " => SmoothFunction.comp
 
 def addVec {n : ℕ} (v1 : ℝ^n) : ℝ := 
   v1.toList.sum
+
+instance : Coe (ℝ^1 → ℝ) (ℝ → ℝ) := ⟨(fun (f : ℝ^(1 : ℕ) → ℝ) => (fun (x : ℝ) => f ⟨[x], rfl⟩))⟩

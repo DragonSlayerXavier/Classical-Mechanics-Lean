@@ -117,7 +117,7 @@ def Particle.Ek (z : Particle) : (ℝ → ℝ) :=
 /-! We define the potential energy of a particle
 -/
 
-def Particle.Ep (a b : ℝ)(z : Particle) [int : Integrable z.F] := 
+def Particle.Ep (a b : ℝ)(z : Particle) [int : Integrable (z.F : (ℝ → ℝ))] : ℝ → ℝ := 
   int.integral a b
   
 
