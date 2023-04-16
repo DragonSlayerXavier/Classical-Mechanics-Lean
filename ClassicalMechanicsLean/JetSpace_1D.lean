@@ -110,3 +110,5 @@ def addVec {n : ℕ} (v1 : ℝ^n) : ℝ :=
   v1.toList.sum
 
 instance : Coe (ℝ^1 → ℝ) (ℝ → ℝ) := ⟨(fun (f : ℝ^(1 : ℕ) → ℝ) => (fun (x : ℝ) => f ⟨[x], rfl⟩))⟩
+
+instance : Coe (ℝ^1 → ℝ^1) (ℝ → ℝ) := ⟨(fun (f : ℝ^(1 : ℕ) → ℝ^(1 : ℕ)) => (fun (x : ℝ) => f ⟨[x], rfl⟩))⟩
