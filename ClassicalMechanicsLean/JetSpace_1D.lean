@@ -15,6 +15,7 @@ universe u
 /-- Notation ℝ^n etc -/
 instance : HPow (Type u) ℕ (Type u) := ⟨fun k n ↦ Vector k n⟩ 
 
+/-
 structure Jet (n : ℕ) where 
   value : ℝ 
   gradient : ℝ ^ n
@@ -39,6 +40,7 @@ def Vector.dot {n: ℕ}(v₁ v₂ : ℝ ^ n) : ℝ :=
 
 instance liebnitz {n: ℕ} : Mul (Jet n) :=
   ⟨fun j₁ j₂ => ⟨j₁.value * j₂.value, j₁.value • j₂.gradient + j₂.value • j₁.gradient⟩⟩
+-/
 
 /-- Should be replaced by an actual definition eventually -/
 opaque hasGradAt {n: ℕ} (f : ℝ ^ n → ℝ)(x : ℝ ^n) : Prop 
@@ -66,8 +68,10 @@ def consVector {n : ℕ} (c : ℝ) : ℝ ^ n := match n with
   | 0 => Vector.nil
   | n + 1 => Vector.cons c (zeroVector : ℝ ^ n)
 
+/-
 def Jet.const (n : ℕ) (c : ℝ) : Jet n := 
   ⟨c, zeroVector⟩
+-/
 
 def SmoothFunction.const (n : ℕ) (c : ℝ) : SmoothFunction n := 
   ⟨fun _ => c, fun _ => 0⟩
@@ -101,7 +105,7 @@ def SmoothFunction.comp {n: ℕ} (g : SmoothFunction 1) (f : SmoothFunction n)  
   ⟨fun v => g.asFunc ⟨[f.asFunc v], rfl⟩, fun v => 
     let g' : ℝ := g.grad (⟨[f.asFunc v], rfl⟩ )
     let f' := f.grad v
-    g' •  f'⟩
+    g' • f'⟩
 
 
 infix:65 " ∘ " => SmoothFunction.comp

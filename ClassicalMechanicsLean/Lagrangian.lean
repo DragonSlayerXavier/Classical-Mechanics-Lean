@@ -38,4 +38,4 @@ def Particle.Ek'_v_t (z : Particle) : (ℝ → ℝ) :=
   fun (t : ℝ) => (z.m)*((z.v.grad ⟨[t], rfl⟩) : ℝ)
 
 structure LagrangianSystem extends Particle where 
-  EulerLagrange_Equation : fun (z : Particle) => ((fun (x : ℝ^1) => z.V.grad x) : (ℝ^1 → ℝ)) = ((fun t => z.Ek'_v_t t): (ℝ^1 → ℝ))
+  EulerLagrange_Equation : (fun (z : Particle) => ((fun (x : ℝ) => z.V.grad ⟨[x],rfl⟩))) = (fun (z : Particle) => (fun t => ⟨[z.Ek'_v_t t],rfl⟩))

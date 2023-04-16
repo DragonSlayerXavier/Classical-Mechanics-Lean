@@ -1,5 +1,7 @@
+import Mathlib.Data.Matrix.Basic
 import Mathlib
 
+open scoped Matrix
 
 /-!
 # Jet Spaces
@@ -7,130 +9,151 @@ import Mathlib
 These consist of the value of a function at a point, and the value of its gradient at that point. Smooth functions are functions on jet spaces.
 -/
 
-noncomputable example : Field ℝ := inferInstance
+/- - Notation ℝ^n etc -/
+-- instance : HPow (Type u) ℕ (Type u) := ⟨fun k n ↦ Vector k n⟩
+
+-- abbrev Vector α n := Fin n → α
+
+local infixl:arg (priority := high) "^" => Vector
+
+abbrev Matrix' (m n : ℕ) α :=  _root_.Matrix (Fin m) (Fin n) α
+-- #check Matrix
+
+/- structure Jet (n : ℕ) (m : ℕ) where 
+  value : ℝ ^ m
+  gradient : Jet.Matrix m n ℝ
 
 namespace Jet
 
-universe u
+-- instance : AddCommGroup (Jet n m) where
 
-/-- Notation ℝ^n etc -/
--- instance : HPow (Type u) ℕ (Type u) := ⟨fun k n ↦ Vector k n⟩ 
+protected def add {n m : ℕ} : Jet n m → Jet n m → Jet n m
+| ⟨val₁, grad₁⟩, ⟨val₂, grad₂⟩ => ⟨val₁ + val₂, grad₁ + grad₂⟩
 
-notation (priority := high) x:85 "^" y:85 => Vector x y
+protected noncomputable def smul {n m : ℕ} (c : ℝ) : Jet n m → Jet n m
+| ⟨val, grad⟩ => ⟨c • val, c • grad⟩ -/
 
-structure Jet (n : ℕ) where 
-  value : ℝ 
-  gradient : ℝ ^ n
+namespace Vector
 
+instance : GetElem (α ^ n) Nat α (fun _ i => i < n) where
+  getElem v i h := v.get ⟨i, h⟩
+#check fun n (v : ℝ ^ n) (i : ℕ) (_ : i < n) => v[i]
 
-instance  {n : ℕ } : Add  (ℝ ^ n) := ⟨fun v₁ v₂ => 
-  Vector.map₂ (· + ·) v₁ v₂⟩
+instance : Coe ℝ ℝ^1 := ⟨fun c => Vector.cons c Vector.nil⟩
+-- instance : Coe ℝ^1 ℝ  := ⟨fun v => v[0]⟩
 
-#check Vector.map₂
-
-instance addJets {n: ℕ} : Add (Jet n) := 
-    ⟨fun j₁ j₂ => ⟨j₁.value + j₂.value, j₁.gradient + j₂.gradient⟩⟩
-
-instance scMul {n : ℕ } : SMul ℝ  (ℝ ^ n) := 
-  ⟨fun c v => v.map (c * ·)⟩
-
-instance scMulJets {n : ℕ } : SMul ℝ (Jet n) :=
-  ⟨fun c j => ⟨c * j.value, c • j.gradient⟩⟩
-
-def Vector.dot {n: ℕ}(v₁ v₂ : ℝ ^ n) : ℝ := 
-  (Vector.map₂ (· * ·) v₁ v₂).toList.sum
-
-instance liebnitz {n: ℕ} : Mul (Jet n) :=
-  ⟨fun j₁ j₂ => ⟨j₁.value * j₂.value, j₁.value • j₂.gradient + j₂.value • j₁.gradient⟩⟩
-
-/-- Should be replaced by an actual definition eventually -/
-opaque hasGradAt {n: ℕ} (f : (ℝ ^ n) → ℝ)(x : ℝ ^n) : Prop 
-
-/-- A function `ℝ^n → ℝ` with its gradient, the commented out condition should be added-/
-structure SmoothFunction (n : ℕ)(m : ℕ) where
-  asFunc : (ℝ ^ n) → ℝ ^ m
-  grad : (ℝ ^ n)  → (ℝ ^ n) → ℝ ^ m
-  --hasGradAt : ∀ x, hasGradAt jetMap x
-
-instance : CoeFun (SmoothFunction n m) (fun _ => (ℝ^n) → ℝ^m) where
-  coe := SmoothFunction.asFunc
-
-/-- Should be proved as a theorem -/
-axiom gradient_determined {n: ℕ} {m : ℕ} (f g : SmoothFunction n m) : 
-    f.asFunc = g.asFunc → f = g
-
-def zeroVector {n : ℕ} : ℝ ^ n := match n with 
-  | 0 => Vector.nil
-  | n + 1 => Vector.cons 0 (zeroVector : ℝ ^ n)
-
-instance {n: ℕ} : Zero (ℝ ^ n) := ⟨zeroVector⟩
-
-def consVector {n : ℕ} (c : ℝ) : ℝ ^ n := match n with 
-  | 0 => Vector.nil
-  | n + 1 => Vector.cons c (zeroVector : ℝ ^ n)
-
-def Jet.const (n : ℕ) (c : ℝ) : Jet n := 
-  ⟨c, zeroVector⟩
-
-def SmoothFunction.const (n : ℕ) (m : ℕ) (c : ℝ^m) : SmoothFunction n m := 
-  ⟨fun _ => c, fun _ => 0⟩
-
-def Vector.coord (i n : ℕ) : (i < n) →  ℝ ^ n :=
-  fun h => 
-  match i, n, h with 
-  | 0, k + 1, _ => 
-    Vector.cons 1 (zeroVector : ℝ ^ k)
-  | i + 1, k + 1, pf => 
-     let tail : ℝ ^ k := Vector.coord i k (Nat.le_of_succ_le_succ pf) 
-     Vector.cons 0 tail
- 
-/-- The coordinate functions
--- Fix later-/
-/-
-def SmoothFunction.coord (i n m : ℕ) (h : i < n) : Smoothfunction n m := 
-  ⟨fun v : Vector ℝ n => Vector.cons (v.get ⟨i, h⟩) Vector.nil, fun _ => 0⟩
--/
-
-
--- instance : Coe  ℝ  (ℝ ^ 1) := ⟨fun c => Vector.cons c Vector.nil⟩
 /- instance (l : List ℝ) (n : outParam ℕ)
          (h : outParam (l.length = n) := by rfl)
     : CoeDep (List ℝ) l (ℝ^n) where
   coe := ⟨l, h⟩ -/
 
-instance : Coe  (Vector ℝ 1) ℝ  := ⟨fun v => v.get ⟨0, Nat.zero_lt_succ 0⟩⟩
+--TODO VERY IMPORTANT
+instance : AddCommGroup ℝ^n := sorry
+instance : Module ℝ ℝ^n := sorry
 
-/-! Composition with a smooth function `ℝ → ℝ` with chain rule for derivative
--/
+def dotProduct : {n : ℕ} → ℝ ^ n → ℝ ^ n → ℝ :=
+-- (Vector.map₂ (· * ·) v₁ v₂).toList.sum
+/- | 0, _, _ => 0
+| n+1, v₁, v₂ => v₁[0] * v₂[0] + Vector.dot (n := n) v₁.tail v₂.tail -/
+  (·.get ⬝ᵥ ·.get)
 
-/-! Matrix muliplication has been ported to mathlib4 and can be used here
--/
-namespace Matrix
+def stdBasis {n : ℕ} (i : ℕ) : (i < n) →  ℝ ^ n :=
+  fun h => 
+  match i, n, h with 
+  | 0, k + 1, _ =>
+    Vector.cons 1 (0 : ℝ^k)
+  | i + 1, k + 1, pf => 
+    let tail : ℝ ^ k := Vector.stdBasis i (Nat.le_of_succ_le_succ pf) 
+    Vector.cons 0 tail
 
-def array.coord {n m i j: ℕ} (h1 : i < n) (h2 : j < m) (f : ℝ^n → ℝ^m) : ℝ := 
-  (f (Vector.coord i n h1)).get ⟨j, h2⟩
+end Vector
 
-def array (n m : ℕ) (f : ℝ^n → ℝ^m) : Vector ℝ (m*n):= 
-  match m, n with 
-  | 0, n => sorry
-  | m+1, n => sorry
-    --let tail : Vector ℝ (m*n) := array n m f
-    --sorry
-    
+def Matrix'.row {n : ℕ} (v : α^n) : Matrix' 1 n α := 
+  fun _ j => v[j]
 
-end Matrix
+def Matrix'.col {n : ℕ} (v : α^n) : Matrix' n 1 α := 
+  fun i _ => v[i]
 
-def matrix_mul {l m n : ℕ} (f : ℝ^n → ℝ^m) (g : ℝ^m → ℝ^l) : ℝ^n → ℝ^l := 
-  sorry
+instance : Coe α^n (Matrix' 1 n α) := ⟨Matrix'.row⟩
+instance : Coe α^n (Matrix' n 1 α) := ⟨Matrix'.col⟩
 
-def SmoothFunction.comp {n: ℕ} {l : ℕ} {m : ℕ} (g : SmoothFunction m l) (f : SmoothFunction n m)  : SmoothFunction n l := 
-  ⟨fun v => g.asFunc (f.asFunc v), fun v =>
-    let g' : ℝ^m → ℝ^l := g.grad (f.asFunc v )
-    let f' : ℝ^n → ℝ^m := f.grad v
-    fun v => g' (f' v)⟩
+/-- Should be replaced by an actual definition eventually -/
+def HasGradAt {n : ℕ} (f : ℝ^n → ℝ^m) (x : ℝ^n) (grad : Matrix' m n ℝ): Prop := by sorry
 
+/-- A function `ℝ^n → ℝ^m` with its gradient. -/
+structure SmoothFunction (n : ℕ) (m : ℕ) where
+  asFunc : ℝ ^ n → ℝ ^ m
+  grad : ℝ ^ n  → Matrix' m n ℝ
+  hasGradAt : ∀ x : ℝ^n, HasGradAt asFunc x (grad x)
 
-infix:65 " ∘ " => SmoothFunction.comp
+namespace SmoothFunction
 
-def addVec {n : ℕ} (v1 : ℝ^n) : ℝ := 
-  v1.toList.sum
+instance : CoeFun (SmoothFunction n m) (fun _ => ℝ^n → ℝ^m) where
+  coe := SmoothFunction.asFunc
+
+/-- Should be proved as a theorem -/
+@[ext]
+axiom ext {n : ℕ} {m : ℕ} (f g : SmoothFunction n m) : 
+    f.asFunc = g.asFunc → f = g
+
+/- def consVector {n : ℕ} (c : ℝ) : ℝ ^ n := match n with 
+  | 0 => Vector.nil
+  | n + 1 => Vector.cons c (zeroVector : ℝ ^ n) -/
+
+def ofConst (c : ℝ^m) : SmoothFunction n m :=
+  ⟨fun _ => c, fun _ => 0, sorry⟩
+
+instance : Coe ℝ^m (SmoothFunction n m) where
+  coe := .ofConst
+
+def coord {n : ℕ} (i : ℕ) (h : i < n) : SmoothFunction n 1 := 
+  ⟨fun v : ℝ^n => v[i], fun _ => Vector.stdBasis i h, sorry⟩
+
+protected def add : SmoothFunction n m → SmoothFunction n m → SmoothFunction n m
+| ⟨f₁, grad₁, h₁⟩, ⟨f₂, grad₂, h₂⟩ => 
+  ⟨fun v => f₁ v + f₂ v, fun v => grad₁ v + grad₂ v,
+   sorry⟩
+
+protected def neg : SmoothFunction n m → SmoothFunction n m
+| ⟨f, grad, h⟩ => ⟨fun v => - f v, fun v => - grad v, sorry⟩
+
+protected noncomputable def smul : SmoothFunction n 1 → SmoothFunction n m → SmoothFunction n m
+| ⟨f₁, grad₁, h₁⟩, ⟨f₂, grad₂, h₂⟩ => 
+  ⟨fun v => (f₁ v)[0] • f₂ v,
+   fun v => f₂ v ⬝ grad₁ v + (f₁ v)[0] • grad₂ v,
+   sorry⟩
+
+instance : AddCommGroup (SmoothFunction n m) where
+  add := SmoothFunction.add
+  add_assoc := by intros; ext1; ext1 v; apply add_assoc
+  add_comm := by intros; ext1; ext1 v; apply add_comm
+  zero := .ofConst 0
+  zero_add := by intros; ext1; ext1 v; apply zero_add
+  add_zero := by intros; ext1; ext1 v; apply add_zero
+  neg := SmoothFunction.neg
+  add_left_neg := by intros; ext1; ext1 v; apply add_left_neg
+
+noncomputable instance : Module ℝ (SmoothFunction n m) where
+  smul c f := SmoothFunction.smul c f
+  smul_add := by intros; ext1; ext1 v; apply smul_add
+  add_smul := by intros; ext1; ext1 v; apply add_smul
+  mul_smul := by intros; ext1; ext1 v; apply mul_smul
+  one_smul := by intros; ext1; ext1 v; apply one_smul
+  smul_zero := by intros; ext1; ext1 v; apply smul_zero
+  zero_smul := by intros; ext1; ext1 v; apply zero_smul
+
+end SmoothFunction
+
+/- protected def dotProduct : SmoothFunction n m → SmoothFunction n m → SmoothFunction n 1
+| ⟨f₁, grad₁, h₁⟩, ⟨f₂, grad₂, h₂⟩ => 
+  ⟨fun v => Vector.dotProduct (f₁ v) (f₂ v),
+   fun v => sorry,
+   sorry⟩ -/
+
+/-- Composition with a smooth function `ℝ → ℝ` with chain rule for derivative -/
+def comp {n: ℕ} {l : ℕ} {m : ℕ} (g : SmoothFunction m l) (f : SmoothFunction n m)  : SmoothFunction n l := 
+  ⟨g ∘ f,
+   fun v => Matrix.mul (g.grad (f v)) (f.grad v),
+   sorry⟩
+
+infixr:65 " ∘ " => SmoothFunction.comp
