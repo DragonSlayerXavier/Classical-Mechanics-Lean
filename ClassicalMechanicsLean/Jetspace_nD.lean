@@ -55,7 +55,26 @@ namespace Vector
 def add {n : ℕ} : ℝ ^ n → ℝ ^ n → ℝ ^ n := 
   fun v₁ v₂ => v₁.map₂ (· + ·) v₂
 
+def smul {n : ℕ} (c : ℝ) : ℝ ^ n → ℝ ^ n := 
+  fun v => v.map (c * ·)
+
 instance : Add (ℝ ^ n) := ⟨Vector.add⟩
+
+instance : smul ℝ (ℝ ^ n) := ⟨Vector.smul⟩
+
+def zero {n : ℕ} : ℝ ^ n := 
+match n with 
+  | 0 => Vector.nil
+  | n + 1 => Vector.cons 0 (zero : ℝ ^ n)
+
+def neg {n : ℕ} : ℝ ^ n → ℝ ^ n := 
+  fun v => v.map (fun x => -x)
+
+instance : Neg (ℝ ^ n) := ⟨Vector.neg⟩
+
+#check Vector.replicate
+
+end Vector
 
 theorem Vector.add_at {n : ℕ} (v₁ v₂ : ℝ ^ n) (i : ℕ) (h : i < n) : 
   (v₁ + v₂).get ⟨i, h⟩  = v₁.get ⟨i ,h⟩ + v₂.get ⟨i, h⟩ := by
@@ -72,34 +91,70 @@ theorem Vector.add_at {n : ℕ} (v₁ v₂ : ℝ ^ n) (i : ℕ) (h : i < n) :
     simp [c]
   | n+1, h₁::t₁, h₂::t₂, i+1, pf =>
     simp
-  
+
+theorem Vector.zero_get {n : ℕ} (i : ℕ) (h : i < n) : 
+  (zero : ℝ ^ n).get ⟨i, h⟩ = 0 := by
+  let ⟨l, ineq⟩ := zero
+  simp[Vector.zero] 
+  match c:n, i, h, l, ineq with
+  | 0, _, _, h₁::_, ineq => 
+    sorry
+  | n+1, 0, _, h₁::_, _  =>
+    simp [c]
+    simp [zero]
+    sorry
+  | n+1, i+1, pf, _, _ =>
+    simp [zero, Vector.zero, Vector.get_eq_get, Vector.cons, Vector.tail] 
+    sorry
+
+theorem Vector.neg_get {n : ℕ} (v : ℝ ^ n) (i : ℕ) (h : i < n) : 
+  (-v).get ⟨i, h⟩ = -v.get ⟨i, h⟩ := by
+  let ⟨l, ineq⟩ := v
+  have lem: Vector.neg v = -v := by
+    rfl
+  match c:n, i, h, l, ineq with
+  | 0, _, _, h₁::_, ineq => 
+    simp
+    sorry
+  | n+1, 0, _, h₁::t₁, _  =>
+    simp [c, lem]
+    sorry
+  | n+1, i+1, pf, _, _ =>
+    simp [Vector.neg, Vector.get_eq_get, Vector.cons, Vector.tail] 
+    sorry
+
 
 --TODO VERY IMPORTANT
 instance : AddCommGroup ℝ^n where
-  add := Vector.map₂ (· + ·)
+  add := Vector.add
   add_assoc := by
     intro a b c
-    let a' : Vector ℝ n := a
-    let b' : Vector ℝ n := b
-    let c' : Vector ℝ n := c
-    apply Vector.ext
-    intro ⟨m, ineq⟩
-    simp
-    simp [Vector.get_eq_get]
-    sorry
+    ext ⟨m, ineq⟩
+    simp [Vector.add_at, add_assoc]
   add_comm := by
     intro v₁ v₂
     ext ⟨m, ineq⟩
     simp[Vector.add_at, add_comm]
-  zero := sorry
-  zero_add := sorry
-  add_zero := sorry
+  zero := Vector.zero
+  zero_add := by 
+    intro v  
+    ext ⟨m, ineq⟩
+    simp [Vector.add_at, Vector.zero_get]
+    apply Vector.zero_get
+  add_zero := by
+    intro a
+    ext ⟨m, ineq⟩
+    simp [Vector.add_at, Vector.zero_get]
+    apply Vector.zero_get
   neg := sorry
   add_left_neg := sorry
 
 instance : Module ℝ ℝ^n where
-  smul := fun c v => v.map (c * ·)
-  smul_add := sorry
+  smul := Vector.smul
+  smul_add := by 
+    intro a x y
+    ext ⟨m, ineq⟩
+    sorry
   add_smul := sorry
   mul_smul := sorry
   one_smul := sorry
