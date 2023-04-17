@@ -11,6 +11,9 @@ namespace Newton_nD
 
 local infixl:arg (priority := high) "^" => Vector
 
+/--
+A particle is defined to be a structre with 
+-/
 structure Particle (n : ℕ) where
   m : ℝ 
   x : SmoothFunction 1 n 
@@ -21,6 +24,10 @@ structure Particle (n : ℕ) where
 /-! We then define particle's velocity and acccelaration as given below
 -/
 
+/--
+The acceleration of the particle is defined to be the gradient of the velocity with respect to time.
+It is represented 
+-/
 def Particle.a {n : ℕ} (z : Particle n) : (ℝ → Matrix' n 1 ℝ) := 
   fun (t : ℝ) => (z.v.grad ⟨[t], rfl⟩)
 
