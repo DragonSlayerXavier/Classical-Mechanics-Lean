@@ -15,7 +15,7 @@ universe u
 /-- Notation ℝ^n etc -/
 instance : HPow (Type u) ℕ (Type u) := ⟨fun k n ↦ Vector k n⟩ 
 
-/-
+
 structure Jet (n : ℕ) where 
   value : ℝ 
   gradient : ℝ ^ n
@@ -40,7 +40,7 @@ def Vector.dot {n: ℕ}(v₁ v₂ : ℝ ^ n) : ℝ :=
 
 instance liebnitz {n: ℕ} : Mul (Jet n) :=
   ⟨fun j₁ j₂ => ⟨j₁.value * j₂.value, j₁.value • j₂.gradient + j₂.value • j₁.gradient⟩⟩
--/
+
 
 /-- Should be replaced by an actual definition eventually -/
 opaque hasGradAt {n: ℕ} (f : ℝ ^ n → ℝ)(x : ℝ ^n) : Prop 

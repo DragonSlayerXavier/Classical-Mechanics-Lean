@@ -1,7 +1,7 @@
 import Mathlib 
 import ClassicalMechanicsLean.JetSpace_1D
 import ClassicalMechanicsLean.Integral
---import ClassicalMechanicsLean.Newton_1D
+import ClassicalMechanicsLean.Newton_1D
 
 namespace Lagrange1
 
@@ -9,10 +9,7 @@ namespace Lagrange1
 ## Lagrangian Mechanics in 1D
 -/
 
-structure Particle where
-  m : ℝ 
-  x : Jet.SmoothFunction 1 
-  v : Jet.SmoothFunction 1
+structure Particle extends Newton1.Particle where
   V : Jet.SmoothFunction 1
 
 def half : ℝ := (1/2 : ℚ )
