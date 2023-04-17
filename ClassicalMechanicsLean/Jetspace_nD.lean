@@ -10,9 +10,6 @@ These consist of the value of a function at a point, and the value of its gradie
 -/
 
 /- - Notation ℝ^n etc -/
--- instance : HPow (Type u) ℕ (Type u) := ⟨fun k n ↦ Vector k n⟩
-
--- abbrev Vector α n := Fin n → α
 
 local infixl:arg (priority := high) "^" => Vector
 
