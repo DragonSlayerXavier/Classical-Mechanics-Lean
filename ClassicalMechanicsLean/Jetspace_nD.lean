@@ -97,15 +97,23 @@ theorem Vector.zero_get {n : ℕ} (i : ℕ) (h : i < n) :
   let ⟨l, ineq⟩ := zero
   simp[Vector.zero] 
   match c:n, i, h, l, ineq with
-  | 0, _, _, h₁::_, ineq => 
-    sorry
+  | 0, _, _, _, ineq =>
+    contradiction 
   | n+1, 0, _, h₁::_, _  =>
     simp [c]
     simp [zero]
     sorry
-  | n+1, i+1, pf, _, _ =>
-    simp [zero, Vector.zero, Vector.get_eq_get, Vector.cons, Vector.tail] 
+  | n+1, i+1, pf, h₁::t₁, ineq =>
+    have lem : i < n := by
+      simp [c] at pf
+      exact pf
+    simp [zero, Vector.zero, Vector.zero_get, c]
+    have := by
+      simp [Vector.get_eq_get]
+      simp [Vector.get_eq_get] at ineq
+      exact ineq
     sorry
+
 
 theorem Vector.neg_get {n : ℕ} (v : ℝ ^ n) (i : ℕ) (h : i < n) : 
   (-v).get ⟨i, h⟩ = -v.get ⟨i, h⟩ := by
@@ -114,8 +122,7 @@ theorem Vector.neg_get {n : ℕ} (v : ℝ ^ n) (i : ℕ) (h : i < n) :
     rfl
   match c:n, i, h, l, ineq with
   | 0, _, _, h₁::_, ineq => 
-    simp
-    sorry
+    contradiction
   | n+1, 0, _, h₁::t₁, _  =>
     simp [c, lem]
     sorry
@@ -146,8 +153,14 @@ instance : AddCommGroup ℝ^n where
     ext ⟨m, ineq⟩
     simp [Vector.add_at, Vector.zero_get]
     apply Vector.zero_get
-  neg := sorry
-  add_left_neg := sorry
+  neg := Vector.neg
+  add_left_neg := by
+    intro a
+    ext ⟨m, ineq⟩
+    simp [Vector.add_at, Vector.neg_get, add_left_neg]
+    
+    
+
 
 instance : Module ℝ ℝ^n where
   smul := Vector.smul
