@@ -20,7 +20,7 @@ def two_prod_half : 1 = prod_half 2 := by
  simp[prod_half]
 
 def Particle.Ek (z : Particle) : (ℝ → ℝ) :=
-  fun (t : ℝ) => (z.m)*(((z.v.asFunc ⟨[t], rfl⟩) : ℝ)^2)*(half)
+  fun (t : ℝ) => (Jet.SmoothFunction.const z.m)*(((z.v.asFunc ⟨[t], rfl⟩) : ℝ)^2)*(half)
 
 def Particle.L (z : Particle) : (ℝ → ℝ) :=
   fun (t : ℝ) => (z.Ek t) - ((z.V.asFunc ⟨[(z.x.asFunc (⟨[t], rfl⟩))], rfl⟩) : ℝ)

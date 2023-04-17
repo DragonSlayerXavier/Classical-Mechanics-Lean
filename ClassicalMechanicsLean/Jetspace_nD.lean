@@ -60,7 +60,7 @@ def smul {n : ℕ} (c : ℝ) : ℝ ^ n → ℝ ^ n :=
 
 instance : Add (ℝ ^ n) := ⟨Vector.add⟩
 
-instance : smul ℝ (ℝ ^ n) := ⟨Vector.smul⟩
+--instance : smul ℝ (ℝ ^ n) := ⟨Vector.smul⟩
 
 def zero {n : ℕ} : ℝ ^ n := 
 match n with 
@@ -92,27 +92,23 @@ theorem Vector.add_at {n : ℕ} (v₁ v₂ : ℝ ^ n) (i : ℕ) (h : i < n) :
   | n+1, h₁::t₁, h₂::t₂, i+1, pf =>
     simp
 
-theorem Vector.zero_get {n : ℕ} (i : ℕ) (h : i < n) : 
+theorem Vector.zero_get {n : ℕ} (i : ℕ) (h : i < n) :
   (zero : ℝ ^ n).get ⟨i, h⟩ = 0 := by
-  let ⟨l, ineq⟩ := zero
-  simp[Vector.zero] 
-  match c:n, i, h, l, ineq with
-  | 0, _, _, _, ineq =>
-    contradiction 
-  | n+1, 0, _, h₁::_, _  =>
+  simp[Vector.zero]
+  match c:n, i, h with
+  | 0, _, _ =>
+    contradiction
+  | k+1, 0, j  =>
     simp [c]
     simp [zero]
-    sorry
-  | n+1, i+1, pf, h₁::t₁, ineq =>
-    have lem : i < n := by
-      simp [c] at pf
-      exact pf
-    simp [zero, Vector.zero, Vector.zero_get, c]
-    have := by
-      simp [Vector.get_eq_get]
-      simp [Vector.get_eq_get] at ineq
-      exact ineq
-    sorry
+  | n+1, i+1, pf =>
+    have zt : (zero : ℝ^ (n + 1)).tail = zero := by
+      rfl
+    let ih := Vector.zero_get i (Nat.lt_of_succ_lt_succ pf)
+    let lm := Vector.get_tail_succ (zero : ℝ^ (n + 1)) ⟨i, Nat.lt_of_succ_lt_succ pf⟩
+    rw [zt] at lm
+    rw [lm] at ih
+    exact ih
 
 
 theorem Vector.neg_get {n : ℕ} (v : ℝ ^ n) (i : ℕ) (h : i < n) : 
@@ -125,6 +121,7 @@ theorem Vector.neg_get {n : ℕ} (v : ℝ ^ n) (i : ℕ) (h : i < n) :
     contradiction
   | n+1, 0, _, h₁::t₁, _  =>
     simp [c, lem]
+    simp [neg]
     sorry
   | n+1, i+1, pf, _, _ =>
     simp [Vector.neg, Vector.get_eq_get, Vector.cons, Vector.tail] 
@@ -158,7 +155,7 @@ instance : AddCommGroup ℝ^n where
     intro a
     ext ⟨m, ineq⟩
     simp [Vector.add_at, Vector.neg_get, add_left_neg]
-    
+    sorry 
     
 
 
@@ -180,7 +177,7 @@ def dotProduct : {n : ℕ} → ℝ ^ n → ℝ ^ n → ℝ :=
 | n+1, v₁, v₂ => v₁[0] * v₂[0] + Vector.dot (n := n) v₁.tail v₂.tail -/
   (·.get ⬝ᵥ ·.get)
 
-def stdBasis {n : ℕ} (i : ℕ) : (i < n) →  ℝ ^ n :=
+def Vector.stdBasis {n : ℕ} (i : ℕ) : (i < n) →  ℝ ^ n :=
   fun h => 
   match i, n, h with 
   | 0, k + 1, _ =>
@@ -189,7 +186,7 @@ def stdBasis {n : ℕ} (i : ℕ) : (i < n) →  ℝ ^ n :=
     let tail : ℝ ^ k := Vector.stdBasis i (Nat.le_of_succ_le_succ pf) 
     Vector.cons 0 tail
 
-end Vector
+
 
 def Matrix'.row {n : ℕ} (v : α^n) : Matrix' 1 n α := 
   fun _ j => v[j]
@@ -203,6 +200,7 @@ instance : Coe α^n (Matrix' n 1 α) := ⟨Matrix'.col⟩
 /-- Should be replaced by an actual definition eventually -/
 def HasGradAt {n : ℕ} (f : ℝ^n → ℝ^m) (x : ℝ^n) (grad : Matrix' m n ℝ): Prop := 
   by sorry
+
 
 /-- A function `ℝ^n → ℝ^m` with its gradient. -/
 structure SmoothFunction (n : ℕ) (m : ℕ) where
