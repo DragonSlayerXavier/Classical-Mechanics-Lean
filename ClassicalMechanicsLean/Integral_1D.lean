@@ -27,8 +27,8 @@ theorem integral_point(f: ℝ → ℝ)[int : Integrable f]
     simp  at l
     assumption
 
-/-!
-As an exercise, prove that flip ends of an interval gives the negative of the integral.
+/--
+The integral over a flipped interval is the negative of the integral over the interval.
 -/
 
 theorem integral_flip (f : ℝ → ℝ) [int : Integrable f]
@@ -126,16 +126,21 @@ This gives polynomial functions as a special case. As an exercise, prove that sm
 We will define some polynomials as smooth functions as an example.
 -/
 
-/- Can we use extends here -/
-
+/--
+Axiom of uniqueness of derivatives.
+-/
 axiom UniqDeriv {n : ℕ} (f g : Jet.SmoothFunction n) : f.asFunc = g.asFunc → f = g
 
+/--
+Two SmoothFunctions are equal if their values and derivatives are equal at all points.
+We have axiomatized that the derivative is unique, so this is a proof by extensionality.
+-/
 @[ext] theorem Jet.SmoothFunction.ext: ∀ {n : ℕ}{f g : Jet.SmoothFunction n}, f.asFunc = g.asFunc  → f = g := by
   apply UniqDeriv
 
 instance : CommRing (Jet.SmoothFunction 1) where 
-  zero := ⟨fun x => 0, fun x => Vector.cons 0 Vector.nil⟩
-  one := ⟨fun x => 1, fun x => Vector.cons 0 Vector.nil⟩
+  zero := ⟨fun _ => 0, fun x => Vector.cons 0 Vector.nil⟩
+  one := ⟨fun _ => 1, fun x => Vector.cons 0 Vector.nil⟩
   add_zero := by
     intro f 
     ext x
@@ -191,7 +196,7 @@ instance : CommRing (Jet.SmoothFunction 1) where
     apply add_left_neg
 
 /-- The coordinate function -/
-def x : Jet.SmoothFunction 1 := ⟨fun x => x, fun x => ⟨[1], rfl⟩⟩
+def x : Jet.SmoothFunction 1 := ⟨fun x => x, fun _ => ⟨[1], rfl⟩⟩
 
 /-- The power function for a smooth function (automatic if ring is proved) -/
 def pow (f: Jet.SmoothFunction 1): ℕ →  Jet.SmoothFunction 1

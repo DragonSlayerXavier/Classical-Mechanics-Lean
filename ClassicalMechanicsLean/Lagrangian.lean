@@ -19,8 +19,12 @@ def prod_half (n : ℕ) : ℝ := ((n : ℚ) * (1/2 : ℚ))
 def two_prod_half : 1 = prod_half 2 := by
  simp[prod_half]
 
+def Particle.v_pow (z : Particle) : Jet.SmoothFunction 1 :=
+  ⟨fun (t : ℝ^1) => ((z.v.asFunc t) : ℝ)^2,
+   fun t => 2 * ((z.v.asFunc t) : ℝ)* ((z.v.asFunc t) : ℝ)⟩
+
 def Particle.Ek (z : Particle) : (ℝ → ℝ) :=
-  fun (t : ℝ) => (Jet.SmoothFunction.const z.m)*(((z.v.asFunc ⟨[t], rfl⟩) : ℝ)^2)*(half)
+  fun (t : ℝ) => (Jet.SmoothFunction.const 1 z.m)*(((z.v.asFunc ⟨[t], rfl⟩) : ℝ)^2)*(half)
 
 def Particle.L (z : Particle) : (ℝ → ℝ) :=
   fun (t : ℝ) => (z.Ek t) - ((z.V.asFunc ⟨[(z.x.asFunc (⟨[t], rfl⟩))], rfl⟩) : ℝ)
