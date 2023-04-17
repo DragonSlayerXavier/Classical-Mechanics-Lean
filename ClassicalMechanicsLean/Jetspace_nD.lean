@@ -49,12 +49,48 @@ instance : Coe ℝ ℝ^1 := ⟨fun c => Vector.cons c Vector.nil⟩
   coe := ⟨l, h⟩ -/
 
 namespace Vector
+#check Vector.nth_eq_nthLe
+--#check _root_.Vector.add
+
+def add {n : ℕ} : ℝ ^ n → ℝ ^ n → ℝ ^ n := 
+  fun v₁ v₂ => v₁.map₂ (· + ·) v₂
+
+instance : Add (ℝ ^ n) := ⟨Vector.add⟩
+
+theorem Vector.add_at {n : ℕ} (v₁ v₂ : ℝ ^ n) (i : ℕ) (h : i < n) : 
+  (v₁ + v₂).get ⟨i, h⟩  = v₁.get ⟨i ,h⟩ + v₂.get ⟨i, h⟩ := by
+  have : (v₁ + v₂) = Vector.add v₁ v₂ := by
+    rfl
+  rw [this, Vector.add, Vector.map₂]
+  simp [Vector.add, Vector.get_eq_get, List.zipWith]
+  let ⟨l₁, ineq₁⟩ := v₁
+  let ⟨l₂, ineq₂⟩ := v₂
+  match c:n,l₁, l₂, i, h with
+  | 0, _, _, _ ,_ => 
+    simp
+  | _+1, h₁::_, h₂::_, 0, _ =>
+    simp [c]
+  | n+1, h₁::t₁, h₂::t₂, i+1, pf =>
+    simp
+  
 
 --TODO VERY IMPORTANT
 instance : AddCommGroup ℝ^n where
   add := Vector.map₂ (· + ·)
-  add_assoc := sorry
-  add_comm := sorry
+  add_assoc := by
+    intro a b c
+    let a' : Vector ℝ n := a
+    let b' : Vector ℝ n := b
+    let c' : Vector ℝ n := c
+    apply Vector.ext
+    intro ⟨m, ineq⟩
+    simp
+    simp [Vector.get_eq_get]
+    sorry
+  add_comm := by
+    intro v₁ v₂
+    ext ⟨m, ineq⟩
+    simp[Vector.add_at, add_comm]
   zero := sorry
   zero_add := sorry
   add_zero := sorry
@@ -62,7 +98,7 @@ instance : AddCommGroup ℝ^n where
   add_left_neg := sorry
 
 instance : Module ℝ ℝ^n where
-  smul := sorry
+  smul := fun c v => v.map (c * ·)
   smul_add := sorry
   add_smul := sorry
   mul_smul := sorry
