@@ -30,6 +30,9 @@ theorem integral_point(f: ℝ^n → ℝ)[int : Integrable f]
     simp  at l
     assumption
 
+/--
+
+-/
 theorem integral_flip (f : ℝ^n → ℝ) [int : Integrable f]
   (a b : ℝ^n) : integral f a b = - integral f b a := by
     unfold integral
