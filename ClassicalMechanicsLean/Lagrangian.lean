@@ -1,6 +1,6 @@
 import Mathlib 
 import ClassicalMechanicsLean.JetSpace_1D
-import ClassicalMechanicsLean.Integral
+import ClassicalMechanicsLean.Integral_1D
 import ClassicalMechanicsLean.Newton_1D
 
 namespace Lagrange1
@@ -9,6 +9,10 @@ namespace Lagrange1
 ## Lagrangian Mechanics in 1D
 -/
 
+/--
+A particle in the Lagrangian system has the same properties as one in the Newtonian system with
+one additional property: Potential Energy.
+-/
 structure Particle extends Newton1.Particle where
   V : Jet.SmoothFunction 1
 

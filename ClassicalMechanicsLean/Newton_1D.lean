@@ -1,6 +1,6 @@
 import Mathlib 
 import ClassicalMechanicsLean.JetSpace_1D
-import ClassicalMechanicsLean.Integral
+import ClassicalMechanicsLean.Integral_1D
 
 
 namespace Newton1
