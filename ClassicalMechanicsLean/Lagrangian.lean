@@ -30,16 +30,17 @@ def Particle.Ek (z : Particle) : Jet.SmoothFunction 1 :=
 
 def Particle.L (z : Particle) : Jet.SmoothFunction 1 := z.Ek - z.V
 
-
 def Particle.Action (z : Particle) [int : Integrable z.L]: (ℝ → ℝ)  :=
   fun (t : ℝ) => (int.integral 0 t)
 
-def Particle.Ek'_v (z : Particle) : (ℝ → ℝ) :=
-  fun (t : ℝ) => (z.m)*((z.v.asFunc ⟨[t], rfl⟩) : ℝ)
+def Particle.Deriv_L_v (z : Particle) : Jet.SmoothFunction 1 :=
+  ⟨fun (t : ℝ^1) => (z.m)*(z.v.asFunc t), 
+   fun (t : ℝ^1) => ⟨[(z.m)*((z.v.grad t) : ℝ)], rfl⟩
+  ⟩
 
-def Particle.Ek'_v_t (z : Particle) : (ℝ → ℝ) :=
-  fun (t : ℝ) => (z.m)*((z.v.grad ⟨[t], rfl⟩) : ℝ)
+def Particle.Deriv_L_x (z : Particle) : ℝ^1 → ℝ :=
+  fun (x : ℝ^1) => (z.m)*(z.V.grad x)
 
 structure LagrangianSystem extends Particle where 
-  EulerLagrange_Equation : (fun (z : Particle) => ((fun (x : ℝ) => z.V.grad ⟨[x],rfl⟩))) = (fun (z : Particle) => (fun t => ⟨[z.Ek'_v_t t],rfl⟩))
+  EulerLagrange_Equation : (fun (z : Particle) => ((fun (x : ℝ^1) => ⟨[z.Deriv_L_x x], rfl⟩))) = (fun (z : Particle) => (fun t => (z.Deriv_L_v.grad t)))
 
