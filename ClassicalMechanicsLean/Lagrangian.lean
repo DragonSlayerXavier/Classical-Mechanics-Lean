@@ -19,15 +19,17 @@ def prod_half (n : ℕ) : ℝ := ((n : ℚ) * (1/2 : ℚ))
 def two_prod_half : 1 = prod_half 2 := by
  simp[prod_half]
 
-def Particle.v_pow (z : Particle) : Jet.SmoothFunction 1 :=
-  ⟨fun (t : ℝ^1) => ((z.v.asFunc t) : ℝ)^2,
-   fun t => 2 * ((z.v.asFunc t) : ℝ)* ((z.v.asFunc t) : ℝ)⟩
+def Particle.v_pow (z : Particle) (n : ℕ) : Jet.SmoothFunction 1 :=
+  ⟨fun (t : ℝ^1) => ((z.v.asFunc t) : ℝ)^n,
+   fun t => ⟨[(n : ℝ) * ((z.v.asFunc t) : ℝ)* ((z.v.asFunc t) : ℝ)], rfl⟩⟩
 
-def Particle.Ek (z : Particle) : (ℝ → ℝ) :=
-  fun (t : ℝ) => (Jet.SmoothFunction.const 1 z.m)*(((z.v.asFunc ⟨[t], rfl⟩) : ℝ)^2)*(half)
+def Particle.Ek (z : Particle) : Jet.SmoothFunction 1 :=
+  ⟨fun (t : ℝ^1) => ((Jet.SmoothFunction.const 1 z.m).asFunc t)*((z.v_pow 2).asFunc t)*((Jet.SmoothFunction.const 1 half).asFunc t),
+   fun (t : ℝ^1) => ⟨[((Jet.SmoothFunction.const 1 z.m).asFunc t)*(((z.v_pow 2).grad t) : ℝ)*((Jet.SmoothFunction.const 1 half).asFunc t)], rfl⟩
+  ⟩
 
-def Particle.L (z : Particle) : (ℝ → ℝ) :=
-  fun (t : ℝ) => (z.Ek t) - ((z.V.asFunc ⟨[(z.x.asFunc (⟨[t], rfl⟩))], rfl⟩) : ℝ)
+def Particle.L (z : Particle) : Jet.SmoothFunction 1 := z.Ek - z.V
+
 
 def Particle.Action (z : Particle) [int : Integrable z.L]: (ℝ → ℝ)  :=
   fun (t : ℝ) => (int.integral 0 t)
@@ -37,8 +39,6 @@ def Particle.Ek'_v (z : Particle) : (ℝ → ℝ) :=
 
 def Particle.Ek'_v_t (z : Particle) : (ℝ → ℝ) :=
   fun (t : ℝ) => (z.m)*((z.v.grad ⟨[t], rfl⟩) : ℝ)
-
--- theorem Particle.L
 
 structure LagrangianSystem extends Particle where 
   EulerLagrange_Equation : (fun (z : Particle) => ((fun (x : ℝ) => z.V.grad ⟨[x],rfl⟩))) = (fun (z : Particle) => (fun t => ⟨[z.Ek'_v_t t],rfl⟩))
