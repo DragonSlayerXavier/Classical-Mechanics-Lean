@@ -102,7 +102,7 @@ noncomputable def System.acom {n : ℕ} {m : ℕ} (S : System n m) : (ℝ → Ma
 -/  
 
 structure NewtonianSystem (n : ℕ) (m : ℕ) extends System n m where 
-  Second_Law : (fun (x : ℝ^n) => fun (t : ℝ) => (toSystem.F x)) = ((fun x: ℝ^n) => ((fun t : ℝ) => ((toSystem.m)•(toSystem.acom t))))
+  Second_Law : (fun (x : ℝ^n) => fun (t : ℝ) => Matrix'.col (toSystem.F x)) = (fun x: ℝ^n => (fun t : ℝ => ((toSystem.m)•(toSystem.acom t))))
   Conservation_of_Momentum :=  (toSystem.F = 0) → (toSystem.p.grad = 0)
 
 
