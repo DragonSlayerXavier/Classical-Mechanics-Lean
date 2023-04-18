@@ -22,7 +22,7 @@ def half : ℝ := (1/2 : ℚ )
 /--Velocity of the particle, raised to the power n-/
 def Particle.v_pow (z : Particle) (n : ℕ) : Jet.SmoothFunction 1 :=
   ⟨fun (t : ℝ^1) => ((z.v.asFunc t) : ℝ)^n,
-   fun t => ⟨[(n : ℝ) * ((z.v.asFunc t) : ℝ)* ((z.v.asFunc t) : ℝ)], rfl⟩⟩
+   fun t => ⟨[(n : ℝ) * ((z.v.asFunc t) : ℝ)^(n-1)* ((z.v.asFunc t) : ℝ)], rfl⟩⟩
 
 /--Kinetic energy of the particle-/
 def Particle.Ek (z : Particle) : Jet.SmoothFunction 1 :=

@@ -120,14 +120,14 @@ theorem Vector.neg_get {n : ℕ} (v : ℝ ^ n) (i : ℕ) (h : i < n) :
   let ⟨l, ineq⟩ := v
   have lem: Vector.neg v = -v := by
     rfl
-  match c:n, i, h, l, ineq with
-  | 0, _, _, h₁::_, ineq => 
+  match c:n, i, h with
+  | 0, _, _ => 
     contradiction
-  | n+1, 0, _, h₁::t₁, _  =>
+  | n+1, 0, h  =>
     simp [c, lem]
     simp [neg]
     sorry
-  | n+1, i+1, pf, _, _ =>
+  | n+1, i+1, pf =>
     simp [Vector.neg, Vector.get_eq_get, Vector.cons, Vector.tail] 
     sorry
 
@@ -159,7 +159,7 @@ instance : AddCommGroup ℝ^n where
   add_left_neg := by
     intro a
     ext ⟨m, ineq⟩
-    simp [Vector.add_get, Vector.neg_get, add_left_neg]
+    simp [Vector.add_get, Vector.neg_get, add_left_neg, Vector.zero, Vector.add, Vector.neg]
     sorry 
     
 /-- Define a vector space structure on ℝ^n over ℝ
