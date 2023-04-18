@@ -160,7 +160,8 @@ instance : AddCommGroup ℝ^n where
     intro a
     ext ⟨m, ineq⟩
     simp [Vector.add_get, Vector.neg_get, add_left_neg, Vector.zero, Vector.add, Vector.neg]
-    sorry 
+    show 0 = Vector.get Vector.zero { val := m, isLt := ineq }
+    rw[Vector.zero_get]
     
 /-- Define a vector space structure on ℝ^n over ℝ
 Left uncompleted due to lack of time
